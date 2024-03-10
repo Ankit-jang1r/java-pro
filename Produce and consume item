@@ -1,0 +1,90 @@
+class company  {
+    int n;
+    boolean b=false;
+    synchronized void produce_item(int n) throws Exception{
+        if(b){
+            try{
+                wait();
+                
+            }
+            catch (InterruptedException e){
+
+            }
+        }
+        this.n=n;
+        System.out.println("produce item is:"+this.n);
+        b=true;
+        notify();
+    }
+    synchronized void consume_item(int n)throws Exception{
+        if(!b){
+            try{
+                wait();
+            }
+            catch(InterruptedException e){
+
+            }
+        }
+        this.n=n;
+        System.out.println("consume item is:"+this.n);
+        b=false;
+        notify();
+    }
+}
+
+class Producer extends Thread{
+    company c;
+    Producer(company c){
+        this.c=c;
+    }
+    public void run(){
+        int i=1;
+
+        while (true){
+            try {
+                this.c.produce_item(i);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+
+            try {
+                Thread.sleep(3000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            i++;
+        }
+    }
+}
+
+class Consumer extends Thread {
+    company c;
+    Consumer(company c){
+        this.c=c;
+    }
+    public void run(){
+        int i=1;
+        while(true){
+            try {
+                this.c.consume_item(i);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            try{
+                Thread.sleep(4000);
+            }catch (Exception e){}
+            i++;
+        }
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+
+        company comp =new company();
+        Producer p=new Producer(comp);
+        Consumer s=new Consumer(comp);
+   p.start();
+       s.start();
+    }
+}
